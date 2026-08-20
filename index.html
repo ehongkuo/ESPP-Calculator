@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Own SoFi ESPP Calculator & Tax Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            letter-spacing: -0.025em;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input[type="number"], input[type="range"] {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="number"] {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            outline: none;
+            margin-top: 1rem;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .tax-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .tax-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tax-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .tax-card h3 {
+            margin-top: 0;
+            font-size: 1rem;
+            color: #fff;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .data-label {
+            color: var(--text-muted);
+        }
+
+        .data-value {
+            font-weight: 600;
+        }
+        
+        .negative {
+            color: var(--danger);
+        }
+
+        .net-payout {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-align: right;
+        }
+
+        .net-profit {
+            font-size: 1rem;
+            color: #fff;
+            text-align: right;
+        }
+
+        .info-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Inputs Column -->
+        <div>
+            <div class="glass-card">
+                <h2>1. ESPP & Tax Assumptions</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="salary">Gross Salary ($)</label>
+                        <input type="number" id="salary" value="165000">
+                    </div>
+                    <div class="form-group">
+                        <label for="paychecks">Paychecks</label>
+                        <input type="number" id="paychecks" value="13">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ordTaxRate">Ordinary Tax Rate (%)</label>
+                        <input type="number" id="ordTaxRate" value="35">
+                    </div>
+                    <div class="form-group">
+                        <label for="cgTaxRate">Long-Term CG Tax (%)</label>
+                        <input type="number" id="cgTaxRate" value="15">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Offering Date Price ($)</label>
+                    <input type="number" id="startPrice" value="16.47" readonly style="opacity: 0.7;">
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h2>2. Market Scenarios</h2>
+                
+                <div class="form-group">
+                    <div class="slider-header">
+                        <label for="purchasePriceSlider">Purchase Date Price (Dec 8)</label>
+                        <span class="slider-value" id="purchasePriceDisplay">$16.47</span>
+                    </div>
+                    <input type="range" id="purchasePriceSlider" min="5" max="40" step="0.1" value="16.47">
+                    <div class="info-text">Determines your Lookback discount & Ordinary Income.</div>
+                </div>
+
+                <div class="form-group" style="margin-top: 2rem;">
+                    <div class="slider-header">
+                        <label for="salePriceSlider">Future Sale Price (For Holds > 1 yr)</label>
+                        <span class="slider-value" id="salePriceDisplay">$20.00</span>
+                    </div>
+                    <input type="range" id="salePriceSlider" min="5" max="40" step="0.1" value="20.00">
+                    <div class="info-text">Determines your Capital Gains.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outputs Column -->
+        <div>
+            <div class="glass-card" style="margin-bottom: 1.5rem;">
+                <h2>Purchase Summary</h2>
+                <div class="form-row">
+                    <div>
+                        <div class="data-label">Total Cash Accumulated</div>
+                        <div class="data-value" id="outTotalCash">$0.00</div>
+                    </div>
+                    <div>
+                        <div class="data-label">Discounted Purchase Price</div>
+                        <div class="data-value" id="outPurchasePrice">$0.00</div>
+                    </div>
+                    <div>
+                        <div class="data-label">Total Shares Bought</div>
+                        <div class="data-value" id="outShares">0.0000</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h2>Post-Tax Payout Comparison</h2>
+                <p class="info-text" style="margin-top: -1rem; margin-bottom: 1.5rem;">Compares selling immediately on Dec 8 vs. holding and selling later at your "Future Sale Price".</p>
+                
+                <div class="tax-grid">
+                    
+                    <!-- Scenario 1 -->
+                    <div class="tax-card">
+                        <h3>Sell Immediately (< 1 yr)</h3>
+                        <div class="data-row">
+                            <span class="data-label">Sale Price</span>
+                            <span class="data-value" id="s1SalePrice">$0.00</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Ordinary Income</span>
+                            <div style="text-align: right;">
+                                <span class="data-value" id="s1OrdInc">$0.00</span>
+                                <div class="info-text" id="s1OrdIncRate">($0.00 / share)</div>
+                            </div>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Capital Gains</span>
+                            <span class="data-value">$0.00</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Total Taxes</span>
+                            <span class="data-value negative" id="s1Tax">-$0.00</span>
+                        </div>
+                        <div class="net-profit" style="margin-top: 1rem;">
+                            Net Profit: <span id="s1Profit">$0.00</span>
+                        </div>
+                        <div class="net-payout" id="s1Payout">$0.00</div>
+                    </div>
+
+                    <!-- Scenario 2 -->
+                    <div class="tax-card">
+                        <h3>Hold > 1 yr (Disqualifying)</h3>
+                        <div class="data-row">
+                            <span class="data-label">Sale Price</span>
+                            <span class="data-value" id="s2SalePrice">$0.00</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Ordinary Income</span>
+                            <div style="text-align: right;">
+                                <span class="data-value" id="s2OrdInc">$0.00</span>
+                                <div class="info-text" id="s2OrdIncRate">($0.00 / share)</div>
+                            </div>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Long-Term CG</span>
+                            <span class="data-value" id="s2CG">$0.00</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Total Taxes</span>
+                            <span class="data-value negative" id="s2Tax">-$0.00</span>
+                        </div>
+                        <div class="net-profit" style="margin-top: 1rem;">
+                            Net Profit: <span id="s2Profit">$0.00</span>
+                        </div>
+                        <div class="net-payout" id="s2Payout">$0.00</div>
+                    </div>
+
+                    <!-- Scenario 3 -->
+                    <div class="tax-card">
+                        <h3>Hold > 2 yrs (Qualifying)</h3>
+                        <div class="data-row">
+                            <span class="data-label">Sale Price</span>
+                            <span class="data-value" id="s3SalePrice">$0.00</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Ordinary Income</span>
+                            <div style="text-align: right;">
+                                <span class="data-value" id="s3OrdInc">$0.00</span>
+                                <div class="info-text" id="s3OrdIncRate">($0.00 / share)</div>
+                            </div>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Long-Term CG</span>
+                            <span class="data-value" id="s3CG">$0.00</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Total Taxes</span>
+                            <span class="data-value negative" id="s3Tax">-$0.00</span>
+                        </div>
+                        <div class="net-profit" style="margin-top: 1rem;">
+                            Net Profit: <span id="s3Profit">$0.00</span>
+                        </div>
+                        <div class="net-payout" id="s3Payout">$0.00</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const formatCur = (num, dec = 2) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: dec, maximumFractionDigits: dec }).format(num);
+
+        function calculate() {
+            // Inputs
+            const salary = parseFloat(document.getElementById('salary').value) || 0;
+            const paychecks = parseInt(document.getElementById('paychecks').value) || 0;
+            const ordTaxRate = (parseFloat(document.getElementById('ordTaxRate').value) || 0) / 100;
+            const cgTaxRate = (parseFloat(document.getElementById('cgTaxRate').value) || 0) / 100;
+            const startPrice = parseFloat(document.getElementById('startPrice').value) || 0;
+            const purchaseDatePrice = parseFloat(document.getElementById('purchasePriceSlider').value) || 0;
+            const salePrice = parseFloat(document.getElementById('salePriceSlider').value) || 0;
+
+            document.getElementById('purchasePriceDisplay').textContent = formatCur(purchaseDatePrice);
+            document.getElementById('salePriceDisplay').textContent = formatCur(salePrice);
+
+            // Purchase Math
+            const biweeklyGross = Math.round((salary / 26) * 100) / 100;
+            const perPaycheckContrib = Math.round((biweeklyGross * 0.15) * 100) / 100;
+            const totalCash = perPaycheckContrib * paychecks;
+
+            const discountedStart = startPrice * 0.85;
+            const discountedPurchase = purchaseDatePrice * 0.85;
+            const actualPurchasePrice = Math.min(discountedStart, discountedPurchase);
+
+            let sharesBought = totalCash / actualPurchasePrice;
+            if (sharesBought > 1517) sharesBought = 1517;
+
+            document.getElementById('outTotalCash').textContent = formatCur(totalCash);
+            document.getElementById('outPurchasePrice').textContent = formatCur(actualPurchasePrice, 4);
+            document.getElementById('outShares').textContent = sharesBought.toFixed(4);
+
+            // SCENARIO 1: Sell Immediately (< 1 yr)
+            // Sale price = purchaseDatePrice
+            const s1OrdIncPerShare = purchaseDatePrice - actualPurchasePrice;
+            const s1TotalOrdInc = s1OrdIncPerShare * sharesBought;
+            const s1Tax = s1TotalOrdInc * ordTaxRate;
+            const s1Profit = s1TotalOrdInc - s1Tax; // Total profit is just the ord inc if sold immediately
+            const s1Payout = totalCash + s1Profit;
+
+            document.getElementById('s1SalePrice').textContent = formatCur(purchaseDatePrice);
+            document.getElementById('s1OrdInc').textContent = formatCur(s1TotalOrdInc);
+            document.getElementById('s1OrdIncRate').textContent = `(${formatCur(s1OrdIncPerShare)} / share)`;
+            document.getElementById('s1Tax').textContent = "-" + formatCur(s1Tax);
+            document.getElementById('s1Profit').textContent = formatCur(s1Profit);
+            document.getElementById('s1Payout').textContent = formatCur(s1Payout);
+
+            // SCENARIO 2: Hold > 1 yr (Disqualifying)
+            const s2OrdIncPerShare = purchaseDatePrice - actualPurchasePrice; // Locked at purchase date
+            const s2LTCGPerShare = salePrice - purchaseDatePrice;
+            
+            const s2TotalOrdInc = s2OrdIncPerShare * sharesBought;
+            const s2TotalCG = s2LTCGPerShare * sharesBought;
+            
+            const s2OrdTax = s2TotalOrdInc * ordTaxRate;
+            // Assuming capital losses can offset other gains, so tax savings apply. If negative, it reduces total tax.
+            const s2CGTax = s2TotalCG * cgTaxRate; 
+            const s2TotalTax = s2OrdTax + s2CGTax;
+            
+            const s2TotalProfit = (salePrice - actualPurchasePrice) * sharesBought;
+            const s2NetProfit = s2TotalProfit - s2TotalTax;
+            const s2Payout = totalCash + s2NetProfit;
+
+            document.getElementById('s2SalePrice').textContent = formatCur(salePrice);
+            document.getElementById('s2OrdInc').textContent = formatCur(s2TotalOrdInc);
+            document.getElementById('s2OrdIncRate').textContent = `(${formatCur(s2OrdIncPerShare)} / share)`;
+            document.getElementById('s2CG').textContent = formatCur(s2TotalCG);
+            document.getElementById('s2Tax').textContent = "-" + formatCur(s2TotalTax);
+            document.getElementById('s2Profit').textContent = formatCur(s2NetProfit);
+            document.getElementById('s2Payout').textContent = formatCur(s2Payout);
+
+            // SCENARIO 3: Hold > 2 yrs (Qualifying)
+            // Ord Income is LESSER of (15% of Start Price) OR (Gain)
+            const maxOrdIncPerShare = startPrice * 0.15;
+            let s3OrdIncPerShare = 0;
+            if (salePrice > actualPurchasePrice) {
+                s3OrdIncPerShare = Math.min(maxOrdIncPerShare, salePrice - actualPurchasePrice);
+            }
+            
+            const adjustedCostBasis = actualPurchasePrice + s3OrdIncPerShare;
+            const s3LTCGPerShare = salePrice - adjustedCostBasis;
+
+            const s3TotalOrdInc = s3OrdIncPerShare * sharesBought;
+            const s3TotalCG = s3LTCGPerShare * sharesBought;
+
+            const s3OrdTax = s3TotalOrdInc * ordTaxRate;
+            const s3CGTax = s3TotalCG * cgTaxRate;
+            const s3TotalTax = s3OrdTax + s3CGTax;
+
+            const s3TotalProfit = (salePrice - actualPurchasePrice) * sharesBought;
+            const s3NetProfit = s3TotalProfit - s3TotalTax;
+            const s3Payout = totalCash + s3NetProfit;
+
+            document.getElementById('s3SalePrice').textContent = formatCur(salePrice);
+            document.getElementById('s3OrdInc').textContent = formatCur(s3TotalOrdInc);
+            document.getElementById('s3OrdIncRate').textContent = `(${formatCur(s3OrdIncPerShare)} / share cap)`;
+            document.getElementById('s3CG').textContent = formatCur(s3TotalCG);
+            document.getElementById('s3Tax').textContent = "-" + formatCur(s3TotalTax);
+            document.getElementById('s3Profit').textContent = formatCur(s3NetProfit);
+            document.getElementById('s3Payout').textContent = formatCur(s3Payout);
+        }
+
+        // Add listeners
+        document.querySelectorAll('input').forEach(i => i.addEventListener('input', calculate));
+        calculate();
+    </script>
+</body>
+</html>
