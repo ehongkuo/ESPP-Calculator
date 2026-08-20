@@ -87,29 +87,29 @@ function App() {
           
           <div className="form-row">
             <div className="form-group">
-              <label>Gross Salary ($)</label>
-              <input type="number" value={salary} onChange={(e) => setSalary(Number(e.target.value) || 0)} />
+              <label htmlFor="salary">Gross Salary ($)</label>
+              <input id="salary" type="number" value={salary} onChange={(e) => setSalary(Number(e.target.value) || 0)} />
             </div>
             <div className="form-group">
-              <label>Paychecks</label>
-              <input type="number" value={paychecks} onChange={(e) => setPaychecks(Number(e.target.value) || 0)} />
+              <label htmlFor="paychecks">Paychecks</label>
+              <input id="paychecks" type="number" value={paychecks} onChange={(e) => setPaychecks(Number(e.target.value) || 0)} />
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label>Ordinary Tax Rate (%)</label>
-              <input type="number" value={ordTaxRate} onChange={(e) => setOrdTaxRate(Number(e.target.value) || 0)} />
+              <label htmlFor="ordTaxRate">Ordinary Tax Rate (%)</label>
+              <input id="ordTaxRate" type="number" value={ordTaxRate} onChange={(e) => setOrdTaxRate(Number(e.target.value) || 0)} />
             </div>
             <div className="form-group">
-              <label>Long-Term CG Tax (%)</label>
-              <input type="number" value={cgTaxRate} onChange={(e) => setCgTaxRate(Number(e.target.value) || 0)} />
+              <label htmlFor="cgTaxRate">Long-Term CG Tax (%)</label>
+              <input id="cgTaxRate" type="number" value={cgTaxRate} onChange={(e) => setCgTaxRate(Number(e.target.value) || 0)} />
             </div>
           </div>
 
           <div className="form-group">
-            <label>Offering Date Price ($)</label>
-            <input type="number" value={startPrice} readOnly />
+            <label htmlFor="startPrice">Offering Date Price ($)</label>
+            <input id="startPrice" type="number" value={startPrice} readOnly />
           </div>
         </div>
 
@@ -118,11 +118,11 @@ function App() {
           
           <div className="form-group">
             <div className="slider-header">
-              <label>Purchase Date Price (Dec 8)</label>
+              <label htmlFor="purchasePrice">Purchase Date Price (Dec 8)</label>
               <span className="slider-value">{formatCur(purchaseDatePrice)}</span>
             </div>
             <input 
-              type="range" min="5" max="40" step="0.1" 
+              id="purchasePrice" type="range" min="5" max="40" step="0.01"
               value={purchaseDatePrice} onChange={(e) => setPurchaseDatePrice(Number(e.target.value))} 
             />
             <div className="info-text">Determines your Lookback discount & Ordinary Income.</div>
@@ -130,11 +130,11 @@ function App() {
 
           <div className="form-group" style={{ marginTop: '2rem' }}>
             <div className="slider-header">
-              <label>Future Sale Price (For Holds &gt; 1 yr)</label>
+              <label htmlFor="salePrice">Future Sale Price (For Holds &gt; 1 yr)</label>
               <span className="slider-value">{formatCur(salePrice)}</span>
             </div>
             <input 
-              type="range" min="5" max="40" step="0.1" 
+              id="salePrice" type="range" min="5" max="40" step="0.01"
               value={salePrice} onChange={(e) => setSalePrice(Number(e.target.value))} 
             />
             <div className="info-text">Determines your Capital Gains.</div>
